@@ -51,13 +51,13 @@ def main():
             elif allowed_amount > medical_deductible_remaining:
                 claim.satisfy_deductible(medical_deductible_remaining)
 
+        if MEDICAL_COPAY and claim.amount:
+            claim.copay(MEDICAL_COPAY)
+
         if MEDICAL_COINSURANCE and claim.amount:
             claim.coinsurance(MEDICAL_COINSURANCE)
             if claim.member_pays > max_oop_remaining:
             	claim.satisfy_oop(max_oop_remaining)
-
-        if MEDICAL_COPAY and claim.amount:
-        	claim.copay(MEDICAL_COPAY)
 
 
         excluded_accum += claim.exclude
