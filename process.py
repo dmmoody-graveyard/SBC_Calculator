@@ -1,5 +1,4 @@
 class Adjudicate:
-	max_oop_met = False
 	medical_deductible_met = False
 	rx_deductible_met = False
 	plan_pays = 0
@@ -56,5 +55,4 @@ class Adjudicate:
 		self.over_oop = self.member_pays - remaining_oop
 		self.member_pays = self.remaining_oop
 		self.plan_pays += self.over_oop
-		self.max_oop_met = True
 		

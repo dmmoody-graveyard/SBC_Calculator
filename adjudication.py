@@ -17,7 +17,7 @@ OFFICE_COPAY = 20
 LAB_COPAY = 0
 
 # Plan Coinsurance
-RX_COINSURANCE = 0
+RX_COINSURANCE = 0.2
 DME_COINSURANCE = 0.2
 PREVENTIVE_COINSURANCE = 0.2
 OFFICE_COINSURANCE = 0.2
@@ -85,7 +85,7 @@ def main():
 				plan_fully_pays()
 
 			# Pays claims at 100% after the OOP max is satisfied
-			if claim.max_oop_met:
+			if not max_oop_remaining:
 				claim.plan_fully_pays()
 
 			# Assess plan specific deductible
@@ -113,85 +113,42 @@ def main():
 			benefit_copay = LAB_COPAY
 			benefit_coinsurance = LAB_COINSURANCE
 			new_adjudicate()
-			excluded_accum += lab.exclude
-			plan_pays_accum += lab.plan_pays
-			member_pays_accum += lab.member_pays
-			deductible_accum += lab.deductible
-			total_claim_accum += lab.claim_amount
-			member_OOP_accum += lab.member_pays
-			plan_pay_total = lab.plan_pays
-			member_pay_total = lab.member_pays
-			deductible_total = lab.deductible
-			copay_total = lab.copay_amount
-			copay_accum += lab.copay_amount
 
 		if category == "Office visits & procedures":
 			claim = office_visit
 			benefit_copay = OFFICE_COPAY
 			benefit_coinsurance = OFFICE_COINSURANCE
 			new_adjudicate()
-			excluded_accum += office_visit.exclude
-			plan_pays_accum += office_visit.plan_pays
-			member_pays_accum += office_visit.member_pays
-			deductible_accum += office_visit.deductible
-			total_claim_accum += office_visit.claim_amount
-			member_OOP_accum += office_visit.member_pays
-			plan_pay_total = office_visit.plan_pays
-			member_pay_total = office_visit.member_pays
-			deductible_total = office_visit.deductible
-			copay_total = office_visit.copay_amount
-			copay_accum = office_visit.copay_amount
 
 		if category == "Medical equipment and supplies":
 			claim = dme
 			benefit_copay = DME_COPAY
 			benefit_coinsurance = DME_COINSURANCE
 			new_adjudicate()
-			excluded_accum += dme.exclude
-			plan_pays_accum += dme.plan_pays
-			member_pays_accum += dme.member_pays
-			deductible_accum += dme.deductible
-			total_claim_accum += dme.claim_amount
-			member_OOP_accum += dme.member_pays
-			plan_pay_total = dme.plan_pays
-			member_pay_total = dme.member_pays
-			deductible_total = dme.deductible
-			copay_total = dme.copay_amount
-			copay_accum = dme.copay_amount
 
 		if category == "Pharmacy":
 			claim = rx
 			benefit_copay = RX_COPAY
 			benefit_coinsurance = RX_COINSURANCE
 			new_adjudicate()
-			excluded_accum += rx.exclude
-			plan_pays_accum += rx.plan_pays
-			member_pays_accum += rx.member_pays
-			deductible_accum += rx.deductible
-			total_claim_accum += rx.claim_amount
-			member_OOP_accum += rx.member_pays
-			plan_pay_total = rx.plan_pays
-			member_pay_total = rx.member_pays
-			deductible_total = rx.deductible
-			copay_total = rx.copay_amount
-			copay_accum = rx.copay_amount
 
 		if category == "Vaccines, other preventive":
 			claim = vaccine
 			benefit_copay = PREVENTIVE_COPAY
 			benefit_coinsurance = PREVENTIVE_COINSURANCE
 			new_adjudicate()
-			excluded_accum += vaccine.exclude
-			plan_pays_accum += vaccine.plan_pays
-			member_pays_accum += vaccine.member_pays
-			deductible_accum += vaccine.deductible
-			total_claim_accum += vaccine.claim_amount
-			member_OOP_accum += vaccine.member_pays
-			plan_pay_total = vaccine.plan_pays
-			member_pay_total = vaccine.member_pays
-			deductible_total = vaccine.deductible
-			copay_total = vaccine.copay_amount
-			copay_accum = vaccine.copay_amount
+
+		excluded_accum += claim.exclude
+		plan_pays_accum += claim.plan_pays
+		member_pays_accum += claim.member_pays
+		deductible_accum += claim.deductible
+		total_claim_accum += claim.claim_amount
+		member_OOP_accum += claim.member_pays
+		plan_pay_total = claim.plan_pays
+		member_pay_total = claim.member_pays
+		deductible_total = claim.deductible
+		copay_total = claim.copay_amount
+		copay_accum = claim.copay_amount
 
 		line_item["RunningClaimTotal"] = total_claim_accum
 		line_item["PlanPay"] = plan_pay_total
