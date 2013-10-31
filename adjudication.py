@@ -10,20 +10,18 @@ MY_FILE = "newlinediabetesSBC.csv"
 MAX_OOP = 500
 
 # Plan Copays
-RX_COPAY = 0
-MEDICAL_COPAY = 0
+RX_COPAY = 10
 DME_COPAY = 0
 PREVENTIVE_COPAY = 0
 OFFICE_COPAY = 20
 LAB_COPAY = 0
 
 # Plan Coinsurance
-RX_COINSURANCE = .2
-MEDICAL_COINSURANCE = .2
-DME_COINSURANCE = 0
-PREVENTIVE_COINSURANCE = 0
-OFFICE_COINSURANCE = 0
-LAB_COINSURANCE = 0
+RX_COINSURANCE = 0
+DME_COINSURANCE = 0.2
+PREVENTIVE_COINSURANCE = 0.2
+OFFICE_COINSURANCE = 0.2
+LAB_COINSURANCE = 0.2
 
 # Plan Deductibles
 RX_DEDUCTIBLE = 0
@@ -58,6 +56,7 @@ def main():
 		deductible_total = 0
 		copay_total = 0
 		benefit_copay = 0
+		benefit_coinsurance = 0
 
 		# Claim specific values
 		allowed_amount = float(line_item["AmountAllowed"])
@@ -97,20 +96,22 @@ def main():
 					claim.satisfy_deductible(medical_deductible_remaining)
 
 			# Assess plan specific copay
-			if not claim.max_oop_met and benefit_copay and claim.amount:
+			if max_oop_remaining and benefit_copay and claim.amount:
 				if benefit_copay <= claim.amount:
 					claim.full_copay(benefit_copay)
 				elif benefit_copay > claim.amount:
 					claim.partial_copay(benefit_copay)
 
 			# Assess plan specific coinsurance
-			if MEDICAL_COINSURANCE and claim.amount:
-				claim.coinsurance(MEDICAL_COINSURANCE)
+			if benefit_coinsurance and claim.amount:
+				claim.coinsurance(benefit_coinsurance)
 				if claim.member_pays > max_oop_remaining:
 					claim.satisfy_oop(max_oop_remaining)
 
 		if category == "Laboratory tests":
 			claim = lab
+			benefit_copay = LAB_COPAY
+			benefit_coinsurance = LAB_COINSURANCE
 			new_adjudicate()
 			excluded_accum += lab.exclude
 			plan_pays_accum += lab.plan_pays
@@ -127,6 +128,7 @@ def main():
 		if category == "Office visits & procedures":
 			claim = office_visit
 			benefit_copay = OFFICE_COPAY
+			benefit_coinsurance = OFFICE_COINSURANCE
 			new_adjudicate()
 			excluded_accum += office_visit.exclude
 			plan_pays_accum += office_visit.plan_pays
@@ -142,6 +144,8 @@ def main():
 
 		if category == "Medical equipment and supplies":
 			claim = dme
+			benefit_copay = DME_COPAY
+			benefit_coinsurance = DME_COINSURANCE
 			new_adjudicate()
 			excluded_accum += dme.exclude
 			plan_pays_accum += dme.plan_pays
@@ -157,6 +161,8 @@ def main():
 
 		if category == "Pharmacy":
 			claim = rx
+			benefit_copay = RX_COPAY
+			benefit_coinsurance = RX_COINSURANCE
 			new_adjudicate()
 			excluded_accum += rx.exclude
 			plan_pays_accum += rx.plan_pays
@@ -172,6 +178,8 @@ def main():
 
 		if category == "Vaccines, other preventive":
 			claim = vaccine
+			benefit_copay = PREVENTIVE_COPAY
+			benefit_coinsurance = PREVENTIVE_COINSURANCE
 			new_adjudicate()
 			excluded_accum += vaccine.exclude
 			plan_pays_accum += vaccine.plan_pays
