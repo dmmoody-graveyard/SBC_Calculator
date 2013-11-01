@@ -25,7 +25,6 @@ LAB_COINSURANCE = 0.2
 
 # Plan Deductibles
 RX_DEDUCTIBLE = 0
-MEDICAL_DEDUCTIBLE = 100
 DME_DEDUCTIBLE = 0
 PREVENTIVE_DEDUCTIBLE = 0
 OFFICE_DEDUCTIBLE = 0
@@ -103,7 +102,7 @@ def main():
 					claim.partial_copay(benefit_copay)
 
 			# Assess plan specific coinsurance
-			if benefit_coinsurance and claim.amount:
+			if max_oop_remaining and benefit_coinsurance and claim.amount:
 				claim.coinsurance(benefit_coinsurance)
 				if claim.member_pays > max_oop_remaining:
 					claim.satisfy_oop(max_oop_remaining)
@@ -112,30 +111,35 @@ def main():
 			claim = lab
 			benefit_copay = LAB_COPAY
 			benefit_coinsurance = LAB_COINSURANCE
+			benefit_deductible = LAB_DEDUCTIBLE
 			new_adjudicate()
 
 		if category == "Office visits & procedures":
 			claim = office_visit
 			benefit_copay = OFFICE_COPAY
 			benefit_coinsurance = OFFICE_COINSURANCE
+			benefit_deductible = OFFICE_DEDUCTIBLE
 			new_adjudicate()
 
 		if category == "Medical equipment and supplies":
 			claim = dme
 			benefit_copay = DME_COPAY
 			benefit_coinsurance = DME_COINSURANCE
+			benefit_deductible = DME_DEDUCTIBLE
 			new_adjudicate()
 
 		if category == "Pharmacy":
 			claim = rx
 			benefit_copay = RX_COPAY
 			benefit_coinsurance = RX_COINSURANCE
+			benefit_deductible = RX_DEDUCTIBLE
 			new_adjudicate()
 
 		if category == "Vaccines, other preventive":
 			claim = vaccine
 			benefit_copay = PREVENTIVE_COPAY
 			benefit_coinsurance = PREVENTIVE_COINSURANCE
+			benefit_deductible = PREVENTIVE_DEDUCTIBLE
 			new_adjudicate()
 
 		excluded_accum += claim.exclude
@@ -148,7 +152,7 @@ def main():
 		member_pay_total = claim.member_pays
 		deductible_total = claim.deductible
 		copay_total = claim.copay_amount
-		copay_accum = claim.copay_amount
+		copay_accum += claim.copay_amount
 
 		line_item["RunningClaimTotal"] = total_claim_accum
 		line_item["PlanPay"] = plan_pay_total
@@ -166,6 +170,7 @@ def main():
 	print "Plan Paid: %s" % plan_pays_accum
 	print "Deductible paid total: %s" % deductible_accum
 	print "Total Excluded: %s" % excluded_accum
+	print "Copay paid total: %s" % copay_accum
 
 
 if __name__ == "__main__":
